@@ -1,0 +1,11 @@
+extends layout
+
+block content
+    .container
+        .row.justify-content-center.align-items-center.min-vh-100
+            .col-lg-6
+                h1.text-center.mb-4 Search
+                form(method="POST", action="/search/search")
+                    .input-group.mb-3
+                        input.form-control(type="text", name="searchTerm", placeholder="Enter a root")
+                        button.btn.btn-success(type="submit") Search

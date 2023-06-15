@@ -1,0 +1,14 @@
+extends layout
+
+block content
+    .container
+        h1.mb-4.text-center Search Results
+        if results.length > 0
+            each result in results
+                .card.mb-3
+                    .card-body
+                        h5.card-title
+                            a(href=`/dictionary/${result.entry_id}`)= result.root
+                        p.card-text= result.meaning
+        else
+            p.text-center No results found.
