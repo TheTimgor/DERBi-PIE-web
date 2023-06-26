@@ -17,12 +17,11 @@ const dictionaryEntry = {
 router.get('/', async (req, res) => {
     // Perform the database query to retrieve search results
     const searchResults = await performSearch(req.query.search);
-    console.log(searchResults)
     // if there is a single result, we redirect to it
-    // if(searchResults.length === 1){
-    //     res.redirect(`/dictionary/${encodeURIComponent(searchResults.word)}`);
-    //     return
-    // }
+    if(searchResults.length === 1){
+        res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].entry_id)}`);
+        return
+    }
 
     // Render the search results page
     res.render('results', { results: searchResults });

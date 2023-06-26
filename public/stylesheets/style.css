@@ -1,8 +1,20 @@
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
 }
+
+.alternate-letter-entry {
+  padding: 2px;
+  min-width: 2em;
+}
+.popover{
+  max-width:60em;
+}
+.splash-image {
+   width: 400px;
+   height: auto;
+  margin: 2em;
+ }

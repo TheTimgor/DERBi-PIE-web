@@ -7,7 +7,6 @@ const dbName = 'DERBI-PIE';
 const client = new MongoClient(uri);
 
 
-
 router.get('/:entry_id', async (req, res) => {
     const entry_id = req.params.entry_id;
 

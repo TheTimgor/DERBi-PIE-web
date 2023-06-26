@@ -2,20 +2,22 @@ extends layout
 
 block content
     .container
-        .row.justify-content-center
-            .col-lg-6
-                h1.mb-4.text-center #{entry.root.join(', ')}
-                .card
-                    .card-body
-                        //p
-                        //    strong English:
-                        //    span.ml-2= ' ' + entry.meaning
-                        p
-                            strong English Meaning:
-                            span.ml-2= ' ' + entry.meaning
-                        p
-                            strong Part of Speech:
-                            span.ml-2= ' ' + entry.pos
-                        //p
-                        //    strong Synonyms:
-                        //    span.ml-2 #{entry.synonyms.join(', ')}
+        .card
+            .card-body
+                .row.justify-content-center
+                    .col-lg-4
+                        strong.mb-4.text-center #{entry.root.join(', ')}
+                    .col-lg-4
+                        span.ml-2= ' ' + entry.meaning
+                    //p
+                    //    strong English:
+                    //    span.ml-2= ' ' + entry.meaning
+                    //p
+                    //    strong English Meaning:
+                    //    span.ml-2= ' ' + entry.meaning
+                    p
+                        strong Part of Speech:
+                        span.ml-2= ' ' + entry.pos
+                    //p
+                    //    strong Synonyms:
+                    //    span.ml-2 #{entry.synonyms.join(', ')}
