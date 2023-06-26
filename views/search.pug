@@ -4,13 +4,19 @@ block content
     .container
         .row.justify-content-center.align-items-center
             img(src="images/Trundholm-Sun-Chariot.jpg" class="splash-image")
-        .row.justify-content-center.align-items-top.min-vh-100
-            .col-lg-6
+        .row.justify-content-center.align-items-top
+            .col-lg-8
                 h1.text-center.mb-4 Search
                 form(method="POST", action="/search/search")
                     .input-group.mb-3
-                        input.form-control.alt-keys(type="text", name="searchTerm", placeholder="Enter a root", id="search-input")
-                        button.btn.btn-success(type="submit") Search
+                        //label.input-group-text(for="search-input") Meaning
+                        input.form-control.alt-keys#search-input(type="text", name="searchTerm", placeholder="Enter a root")
                         #alt-letter-popover(style="display: none;")
+                        button.btn.btn-success(type="submit") Search
+                        a.btn.btn-info(href="instructions") ?
+                        button.btn.btn-warning(type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearch" aria-expanded="false" aria-controls="collapseSearch") Advanced
+        .row.justify-content-center.align-items-top
+            .col-lg-6.collapse#collapseSearch
+                h3.text-center.mb-4 Advanced Search
 
     script(src="javascripts/alt_letters.js")

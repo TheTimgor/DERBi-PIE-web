@@ -6,14 +6,6 @@ const uri = 'mongodb://localhost:27017';
 const dbName = 'DERBI-PIE';
 const client = new MongoClient(uri);
 
-const dictionaryEntry = {
-    entry_id: "example_id",
-    root: ['example', 'example2'],
-    meaning: ['A thing characteristic of its kind or illustrating a general rule.'],
-    pos: ['noun'],
-    other_meanings: {'German': 'Beispiel'},
-};
-
 router.get('/', async (req, res) => {
     // Perform the database query to retrieve search results
     const searchResults = await performSearch(req.query.search);
@@ -30,10 +22,13 @@ router.get('/', async (req, res) => {
 async function performSearch(word) {
     const query = { meaning: { $regex: word, $options: 'i' } };
     try {
+        const test = new RegExp(word)
         const collection = client.db(dbName).collection("common")
         return await collection.find(query).toArray()
-    } finally {}
-    return [dictionaryEntry]
+    }
+    catch (e) {
+        return []
+    }
 }
 
-module.exports = {resultsRoutes: router, dictionaryEntry};
+module.exports = {resultsRoutes: router};
