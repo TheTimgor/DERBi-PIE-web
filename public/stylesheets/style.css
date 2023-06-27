@@ -18,3 +18,17 @@ a {
    height: auto;
   margin: 2em;
  }
+
+.footer {
+    bottom: 0;
+    /*position: absolute;*/
+    /*width:100%;*/
+}
+
+.page-container {
+    min-height: 100vh;
+}
+
+.divider {
+    height: 2em;
+}

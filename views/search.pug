@@ -18,5 +18,52 @@ block content
         .row.justify-content-center.align-items-top
             .col-lg-6.collapse#collapseSearch
                 h3.text-center.mb-4 Advanced Search
+                .form-group
+                    label Checkboxes
+                    .form-check
+                        input.form-check-input(type='checkbox', id='chkRoots', name='chkRoots')
+                        label.form-check-label(for='chkRoots') Roots
+                    .form-check
+                        input.form-check-input(type='checkbox', id='chkWords', name='chkWords')
+                        label.form-check-label(for='chkWords') Words
+                    .form-check
+                        input.form-check-input(type='checkbox', id='chkMeanings', name='chkMeanings')
+                        label.form-check-label(for='chkMeanings') Meanings
+                    .form-check
+                        input.form-check-input(type='checkbox', id='chkDerivatives', name='chkDerivatives')
+                        label.form-check-label(for='chkDerivatives') Derivatives
+
+                .form-group
+                    label(for='selectLanguages') Designate Specific Branches/Languages
+                    select#selectLanguages.form-control(multiple='multiple', name='languages[]')
+                        option(value='Antolian') Antolian
+                        option(value='Hittite') Hittite
+                        option(value='Palaic') Palaic
+                        option(value='Luvian') Luvian
+
+                .form-group
+                    label(for='selectNumber') Number of Branches/Languages for Derivative
+                    select#selectNumber.form-control(name='number')
+                        option(value='1') 1
+                        option(value='2') 2
+                        option(value='3') 3
+                        option(value='4') 4
+
+                .form-group
+                    label(for='rootShape') Root/Word Shape Text Inputs
+                    input#rootShape.form-control(type='text', name='rootShape', placeholder='Begins with')
+
+                .form-group
+                    label(for='containsShape')
+                    input#containsShape.form-control(type='text', name='containsShape', placeholder='Contains')
+
+                .form-group
+                    label(for='shape')
+                    input#shape.form-control(type='text', name='shape', placeholder='Shape')
+
+                .form-group
+                    label(for='semanticKeywords') Semantic Keywords
+                    input#semanticKeywords.form-control(type='text', name='semanticKeywords', placeholder='Enter keywords')
+        .row
 
     script(src="javascripts/alt_letters.js")
