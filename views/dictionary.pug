@@ -6,9 +6,9 @@ block content
             .card-body
                 .row.justify-content-center
                     .col-lg-4
-                        strong.mb-4.text-center= entry.root
+                        strong.mb-4.text-center !{entry.root}
                     .col-lg-4
-                        span.ml-2= ' ' + entry.meaning
+                        span.ml-2 !{entry.meaning}
                     //p
                     //    strong English:
                     //    span.ml-2= ' ' + entry.meaning
@@ -17,7 +17,7 @@ block content
                     //    span.ml-2= ' ' + entry.meaning
                     p
                         strong Part of Speech:
-                        span.ml-2= ' ' + entry.pos
+                        span.ml-2 !{entry.pos.join("<br>")}
                     //p
                     //    strong Synonyms:
                     //    span.ml-2 #{entry.synonyms.join(', ')}
