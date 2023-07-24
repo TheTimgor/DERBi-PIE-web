@@ -6,11 +6,4 @@ router.get('/', (req, res) => {
     res.render('search');
 });
 
-// Define the route to handle the search form submission
-router.post('/search', (req, res) => {
-    const searchTerm = req.body.searchTerm;
-    // Replace the following line with your actual search logic
-    res.redirect(`/results?search=${encodeURIComponent(searchTerm)}`);
-});
-
 module.exports = router;

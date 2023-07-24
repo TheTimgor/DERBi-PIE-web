@@ -15,9 +15,44 @@ block content
                     //p
                     //    strong English Meaning:
                     //    span.ml-2= ' ' + entry.meaning
-                    p
-                        strong Part of Speech:
-                        span.ml-2 !{entry.pos.join("<br>")}
+                    //p
+                    //    strong Part of Speech:
+                    //    span.ml-2 !{entry.pos.join("<br>")}
                     //p
                     //    strong Synonyms:
                     //    span.ml-2 #{entry.synonyms.join(', ')}
+            .card-body
+                each dictionary in dictionaries
+                    if dictionary.data.cross.length > 0
+                        h3 Cross References
+                    each crossEntry in dictionary.data.cross
+                         a(href="/dictionary/" + crossEntry.id)= crossEntry.display
+                    h3 Reflexes
+                    table.table.table-striped.table-bordered
+                        thead
+                            tr
+                                th Language
+                                th Reflex(es)
+                                th Gloss
+                                th Grammar
+                                th Sources
+                        tbody
+                        each familyGroup, familyName in dictionary.categorizedReflexes
+                            tr
+                                td(colspan="1").table-family <strong>#{familyName}</strong>
+                                td(colspan="4")
+                            each reflexes, subFamilyName in familyGroup
+                                each reflex in reflexes
+                                    tr
+                                        td.table-langauge= reflex.language.language_name
+                                        td.table-reflex= reflex.reflexes.join(', ')
+                                        td.table-gloss= reflex.gloss
+                                        td.table-grammar
+                                            each posObj, index in reflex.pos
+                                                span.popover-trigger(data-bs-toggle="popover", data-bs-content=posObj.meaning, data-bs-placement="top")= posObj.code
+                                                if index !== reflex.pos.length - 1
+                                                    | .
+                                        td.table-sources Blank for now
+
+
+    script(src="/javascripts/dictionaryFeatures.js")
