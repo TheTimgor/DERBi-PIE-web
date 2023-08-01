@@ -1,7 +1,7 @@
 extends layout
 
 block content
-    h1.mb-4.text-center Search Results
+    h1.mb-4.text-center Search Results - Found !{results.length} Matching Entries
     if results.length > 0
         each result in results
             .card.mb-3

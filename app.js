@@ -9,8 +9,8 @@ const indexRouter = require('./routes/index');
 const dictionaryRouter = require('./routes/dictionary');
 const searchRoutes = require('./routes/search');
 const {resultsRoutes} = require('./routes/results');
-const instructionsRouter = express.Router().get('/', (req, res) => {console.log("get outta here");res.render('instructions.pug')});
-const aboutRoutes = express.Router().get('/', (req, res) => {console.log("get outta here2");res.render('about')});
+const instructionsRouter = express.Router().get('/', (req, res) => {res.render('instructions.pug')});
+const aboutRoutes = express.Router().get('/', (req, res) => {res.render('about')});
 
 const app = express();
 
