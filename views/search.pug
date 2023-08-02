@@ -12,7 +12,7 @@ block content
                         //label.input-group-text(for="search-input") Meaning
                         input.form-control.alt-keys#search-input(type="text", name="search", placeholder="Enter a root")
                         #alt-letter-popover(style="display: none;")
-                        button.btn.btn-success(type="submit") Search
+                        button.btn.btn-success(type="submit", name='submit', value="normal") Search
                         a.btn.btn-info(href="instructions") ?
                         button.btn.btn-warning(type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearch" aria-expanded="false" aria-controls="collapseSearch") Advanced
         .row.justify-content-center.align-items-top
@@ -44,7 +44,7 @@ block content
 
                     .form-group.text-center
                         br
-                        button.btn.btn-success(type="submit", name='submit') Advanced Search
+                        button.btn.btn-success(type="submit", name='submit', value="advanced") Advanced Search
 
                     //.form-group
                     //    label Checkboxes

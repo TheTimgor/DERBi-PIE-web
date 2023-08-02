@@ -19,44 +19,13 @@ function escapeRegExp(str) {
 async function performSearch(query, collection_name) {
     try {
         const collection = client.db(dbName).collection(collection_name)
+        console.log(JSON.stringify(query))
         return await collection.find(query).toArray()
     }
     catch (e) {
         return []
     }
 }
-
-const linguisticFeatures = {
-    "#": '\\b',
-    "[stop]": '(?:pʰ|bʰ|tʰ|dʰ|ḱʰ|ǵʰ|kʰ|gʰ|kʷʰ|T|K|k\'ʰ|ǵʰ|ǵ\'|kʷ|gʷʰ|g\')',
-    "[fricative]": '(?:h₁|h₂|h₃|H|hₓ|s|z|F)',
-    "-": "(?:[a-zA-Z]+)",
-    glide: 'regex_glide',
-    T: 'regex_T',
-    K: 'regex_K',
-    H: 'regex_H',
-    // Add more linguistic features as needed
-};
-// endregion
-
-router.get('/', async (req, res) => {
-    // Perform the database query to retrieve search results
-    let searchResults = []
-    if (req.query.search || req.query.search === ""){
-        const query = { meaning: { $regex: req.query.search, $options: 'i' } }
-        searchResults = await performSearch(query, "common");
-    }else{
-        searchResults = await newAdvancedSearch(req.query);
-    }
-    // if there is a single result, we redirect to it
-    if(searchResults.length === 1){
-        res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].entry_id)}`);
-        return
-    }
-
-    // Render the search results page
-    res.render('results', { results: searchResults });
-});
 
 function patternedRegex(pseudoRegex) {
     const path = "private/regex.json"
@@ -70,49 +39,87 @@ function patternedRegex(pseudoRegex) {
         .map((item) => item.trim())
         .map((item) => item.replace(pattern, (match) => linguisticDict[match]))
         .map((item) => `(?:${item})`)
-    const completedRegex = `${regexArray.join('|')}`
-    return completedRegex
+    return `${regexArray.join('|')}`
 }
+// endregion
 
+router.get('/', async (req, res) => {
+    // Perform the database query to retrieve search results
+    let searchResults = []
+
+    // switch between a regular search and an advanced search. regular search is default.
+    if (req.query && req.query.submit && req.query.submit === "advanced"){
+        searchResults = await newAdvancedSearch(req.query);
+    }else{
+        const query = { meaning: { $regex: req.query.search, $options: 'i' } }
+        searchResults = await performSearch(query, "common");
+    }
+
+    // if there is a single result, we redirect to it
+    if(searchResults.length === 1){
+        res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].entry_id)}`);
+        return
+    }
+
+    // Render the search results page
+    res.render('results', { results: searchResults });
+});
+
+// region search functions
 async function newAdvancedSearch(data) {
-    const regex = patternedRegex(data["rootSearchPatterned"])
-    const query = {"searchable_roots": {"$regex": regex}}
-    // todo: these results are for the pokorny table, which technically is not the same as the common table. I need to switch that out.
+    // these are technically specific to pokorny, so new dictionaries collections need to either match the format, or have custom functions for their own queries
+    let rootQuery = getPatternedRootQuery(data)
+    let reflexQuery = getReflexMeaningQuery(data)
+    let rootMeaningQuery = getRootMeaningQuery(data)
+    let semanticQuery = getSemanticQuery(data)
+
+    // the combined query, currently just ANDs them all together, getting only the things in common.
+    // todo: May want to eventually add a check box or something to make it an OR query.
+    let query = {"$and": [rootQuery, reflexQuery, rootMeaningQuery, semanticQuery]}
+
+    // todo: these results are for the pokorny table, which technically is not the same as the common table. I need to switch that out when another db gets added.
     let results = await performSearch(query, "pokorny")
     return results
 }
 
-async function advancedSearch(data) {
-    console.log(data)
-    // separate queries are needed for each of the possible categories
-
-    // todo: I have no idea what word shape refers to
-    let categoryQuery = []
-    let regexes = []
-    regexes.push(patternedRegex(data["rootSearchPatterned"]))
-    console.log(regexes)
-
-    if(data['checkRoots']){
-        console.log("checking the roots")
-        categoryQuery.push(mapRegexes("root", regexes))
+function getPatternedRootQuery(data) {
+    const searchPattern = data["rootSearchPatterned"]
+    if (searchPattern === ""){
+        return {}
     }
-    if(data['checkWords']){
-        // todo: I have no idea what this means
-        console.log("checking the words")
-    }
-    if(data['checkMeanings']){
-        console.log("checking the meanings")
-        categoryQuery.push(mapRegexes("meaning", regexes))
-    }
-    // todo: this one requires searching differently
-    if(data['checkDerivatives']){
-        console.log("checking the derivatives")
-        // orQuery.push({meaning: shapedQuery})
-    }
-
-    let query = {$or: categoryQuery}
-    console.log(JSON.stringify(query))
-    return performSearch(query)
+    // query for searching roots, needs to be ignored if there are no searched roots
+    const regex = patternedRegex(searchPattern)
+    return {"searchable_roots": {"$regex": regex}}
 }
+
+function getReflexMeaningQuery(data) {
+    const searchString = data["reflexMeaningSearch"]
+    if (searchString === ""){
+        return {}
+    }
+    const searchRegex = escapeRegExp(searchString)
+    return {"reflexes": {$elemMatch: {"gloss": {"$regex": searchRegex, "$options": "i"}}}}
+}
+
+function getRootMeaningQuery(data) {
+    const searchString = data["rootMeaningSearch"]
+    if (searchString === ""){
+        return {}
+    }
+    const searchRegex = escapeRegExp(searchString)
+    return {"meaning": {"$regex": searchRegex, "$options": "i"}}
+}
+
+function getSemanticQuery(data) {
+    const searchString = data["semanticKeywordSearch"]
+    if (searchString === ""){
+        return {}
+    }
+    const searchRegex = escapeRegExp(searchString)
+    console.log(searchRegex)
+    // todo: The semantic field is never filled in, which means I cannot test this. I dont even know what it is going to look like.
+    return {"semantic": {$elemMatch: {"$regex": searchRegex, "$options": "i"}}}
+}
+// endregion
 
 module.exports = {resultsRoutes: router};
