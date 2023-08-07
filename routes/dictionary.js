@@ -18,16 +18,35 @@ router.get('/:entry_id', async (req, res) => {
     const pokornyCollection = client.db(dbName).collection("pokorny")
     const pokornyEntry = await pokornyCollection.findOne(query)
 
+    // process the reflexes
     let categorized = {}
     if(pokornyEntry && pokornyEntry.reflexes) {
+        pokornyEntry.reflexes = expandSources(pokornyEntry.reflexes)
         categorized = categorizeReflexesByLanguage(pokornyEntry.reflexes)
+        console.log(categorized.length)
     }
-    console.log(pokornyEntry)
+    // console.log(pokornyEntry)
 
 
     // Render the dictionary entry template and pass the data
     res.render('dictionary', { entry: dictionaryEntry, dictionaries: [{data: pokornyEntry, categorizedReflexes: categorized}]});
 });
+
+
+function expandSources(reflexes) {
+    for(let i in reflexes){
+        let combinedSources = new Set();
+        for(let source of reflexes[i].source.text_sources){
+            combinedSources.add(JSON.stringify(source))
+        }
+        for(let source of reflexes[i].source.db_sources){
+            combinedSources.add(JSON.stringify(source))
+        }
+        combinedSources = Array.from(combinedSources).map(JSON.parse);
+        reflexes[i].combinedSources = combinedSources
+    }
+    return reflexes
+}
 
 
 function categorizeReflexesByLanguage(reflexes) {
