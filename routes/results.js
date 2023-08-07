@@ -44,16 +44,8 @@ function patternedRegex(pseudoRegex) {
 // endregion
 
 router.get('/', async (req, res) => {
-    // Perform the database query to retrieve search results
-    let searchResults = []
-
-    // switch between a regular search and an advanced search. regular search is default.
-    if (req.query && req.query.submit && req.query.submit === "advanced"){
-        searchResults = await newAdvancedSearch(req.query);
-    }else{
-        const query = { meaning: { $regex: req.query.search, $options: 'i' } }
-        searchResults = await performSearch(query, "common");
-    }
+    const queryString = req.originalUrl.split('?')[1];
+    let searchResults = await getResults(req.query)
 
     // if there is a single result, we redirect to it
     if(searchResults.length === 1){
@@ -62,8 +54,23 @@ router.get('/', async (req, res) => {
     }
 
     // Render the search results page
-    res.render('results', { results: searchResults });
+    res.render('results', { results: searchResults, queryString: queryString ? `?${queryString}` : ''});
 });
+
+async function getResults(data){
+    // Perform the database query to retrieve search results
+    let searchResults = []
+
+    // switch between a regular search and an advanced search. regular search is default.
+    if (data && data.submit && data.submit === "advanced"){
+        searchResults = await newAdvancedSearch(data);
+    }else{
+        const query = { meaning: { $regex: data.search, $options: 'i' } }
+        searchResults = await performSearch(query, "pokorny");
+    }
+
+    return searchResults
+}
 
 // region search functions
 async function newAdvancedSearch(data) {
@@ -122,4 +129,4 @@ function getSemanticQuery(data) {
 }
 // endregion
 
-module.exports = {resultsRoutes: router};
+module.exports = {resultsRoutes: router, getResults};

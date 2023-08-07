@@ -1,7 +1,12 @@
 extends layout
 
 block content
-    h1.mb-4.text-center Search Results - Found !{results.length} Matching Entries
+    div.d-flex.align-items-center.justify-content-between
+        br
+        h1.mb-4 Search Results - Found !{results.length} Matching Entries
+        if results.length > 0
+            a.btn.btn-primary(href=`/download${locals.queryString}`, title="Download these results as CSV")
+                i.fas.fa-download
     if results.length > 0
         each result in results
             .card.mb-3

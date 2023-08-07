@@ -8,6 +8,7 @@ const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const dictionaryRouter = require('./routes/dictionary');
 const searchRoutes = require('./routes/search');
+const {downloadRouter} = require('./routes/download');
 const {resultsRoutes} = require('./routes/results');
 const instructionsRouter = express.Router().get('/', (req, res) => {res.render('instructions.pug')});
 const aboutRoutes = express.Router().get('/', (req, res) => {res.render('about')});
@@ -30,6 +31,7 @@ app.use('/search', searchRoutes);
 app.use('/results', resultsRoutes);
 app.use('/about', aboutRoutes);
 app.use('/instructions', instructionsRouter);
+app.use('/download', downloadRouter);
 
 
 // catch 404 and forward to error handler
