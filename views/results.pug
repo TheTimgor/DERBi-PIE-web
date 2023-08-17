@@ -2,8 +2,11 @@ extends layout
 
 block content
     div.d-flex.align-items-center.justify-content-between
-        br
-        h1.mb-4 Search Results - Found !{results.length} Matching Entries
+        if renderIndex
+            h1.m-4 Index
+            h6.m-4 Below is a list of all PIE roots and their proposed meanings.  Currently, roots are listed as in Pokorny 1959, though we intend to modernize root shapes in the near future (thus, “h₂eǵ-” for “aǵ-”).
+        else
+            h1.m-4 Search Results - Found !{results.length} Matching Entries
         if results.length > 0
             a.btn.btn-primary(href=`/download${locals.queryString}`, title="Download these results as CSV")
                 i.fas.fa-download

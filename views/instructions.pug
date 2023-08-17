@@ -2,4 +2,32 @@ extends layout
 
 block content
     h1 Instructions
-    p To use the search you should probably read the instructions otherwise it might be a bit difficult to search things. That is all goodbye.
+    .container
+        p In the main search bar, you may currently search for one of two data types: roots & glosses.
+        p Gloss searches do not have to be an exact match.
+
+        p To input “funky” symbols (including laryngeals, glides, syllabic characters, labiovelars, and aspirated stops), type the initial letter and a selection box will appear below the search bar with characters you need. Thus, to input “kʷ”, type “k”, and select “kʷ” below.
+
+        p To type a glide character (like i̯), type “y”, and then delete one of the glide characters + comma. (We’ll get this fixed.)
+
+        p Typing associated letters will also suggest cover symbols in the query box. For instance, typing “t” will suggest “T”, a cover symbol for “t, tʰ, d, dʰ”. Cover symbols include:
+
+        ul
+            li C = any consonant
+            li V = any vowel
+            li O = any obstruent
+            li R = any sonorant
+            li T = any dental stop
+            li K = any dorsal stop
+            li H or hₓ = any laryngeal
+            li F = any fricative
+            li G = any glide
+            li L = any liquid
+            li N = any nasal
+
+        p You may also search for specific sounds and natural classes using features. Features are given in brackets “[X]” and are either “+” or “-”. For instance, searching for “[+labial]er-” will give you all roots that contain a labial sound plus the specific sounds “e” and “r”. For a full list of features, see Sound Features.xlsx (currently only accessible to folks with UK e-mail addresses).
+
+        p Using the dash (“-”) in the middle of a query will assume that there is at least one sound in that space. For instance, the query “bʰ-r-” gives you both “bʰer-” and “bʰorzdo-s” (among others). Dashes at the beginning and end of queries do not affect the search.
+
+        p Using the hashtag/pound sign (“#”) indicates that a boundary in a search. While “per-” gives you epero- and per- (among others), #per- only gives you entries beginning with the sequence “per-”.
+

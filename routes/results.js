@@ -40,17 +40,31 @@ function patternedRegex(pseudoRegex) {
 // endregion
 
 router.get('/', async (req, res) => {
-    const queryString = req.originalUrl.split('?')[1];
-    let searchResults = await getResults(req.query)
+    try {
+        let queryString = req.originalUrl.split('?')[1];
+        let special = false
+        // special case when you just go to results
+        if (queryString === undefined) {
+            queryString = "search="
+            req.query = {'search': '', 'submit': 'normal'}
+            special = true
+        }
+        console.log(req.query)
+        let searchResults = await getResults(req.query)
 
-    // if there is a single result, we redirect to it
-    if(searchResults.length === 1){
-        res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].entry_id)}`);
-        return
+        // if there is a single result, we redirect to it
+        if (searchResults.length === 1) {
+            res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].entry_id)}`);
+            return
+        }
+
+        // Render the search results page
+        res.render('results', {results: searchResults, queryString: queryString ? `?${queryString}` : '', renderIndex: special});
     }
-
-    // Render the search results page
-    res.render('results', { results: searchResults, queryString: queryString ? `?${queryString}` : ''});
+    catch (error) {
+        console.error(error)
+        res.render('results', {results: [], queryString: ''});
+    }
 });
 
 async function getResults(data){
