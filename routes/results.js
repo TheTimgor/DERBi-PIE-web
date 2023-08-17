@@ -8,10 +8,6 @@ const dbName = 'DERBI-PIE';
 const client = new MongoClient(uri);
 
 // region helpers
-function mapRegexes(field, regexes){
-    return {$and: regexes.map((el) => ({[field]: {$regex: el}}))}
-}
-
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
@@ -65,7 +61,9 @@ async function getResults(data){
     if (data && data.submit && data.submit === "advanced"){
         searchResults = await newAdvancedSearch(data);
     }else{
-        const query = { meaning: { $regex: data.search, $options: 'i' } }
+        let rootQuery = getPatternedRootQuery(data["search"])
+        let rootMeaningQuery = getRootMeaningQuery(data["search"])
+        let query = {"$or": [rootQuery, rootMeaningQuery]}
         searchResults = await performSearch(query, "pokorny");
     }
 
@@ -75,10 +73,10 @@ async function getResults(data){
 // region search functions
 async function newAdvancedSearch(data) {
     // these are technically specific to pokorny, so new dictionaries collections need to either match the format, or have custom functions for their own queries
-    let rootQuery = getPatternedRootQuery(data)
-    let reflexQuery = getReflexMeaningQuery(data)
-    let rootMeaningQuery = getRootMeaningQuery(data)
-    let semanticQuery = getSemanticQuery(data)
+    let rootQuery = getPatternedRootQuery(data["rootSearchPatterned"])
+    let reflexQuery = getReflexMeaningQuery(data["reflexMeaningSearch"])
+    let rootMeaningQuery = getRootMeaningQuery(data["rootMeaningSearch"])
+    let semanticQuery = getSemanticQuery(data["semanticKeywordSearch"])
 
     // the combined query, currently just ANDs them all together, getting only the things in common.
     // todo: May want to eventually add a check box or something to make it an OR query.
@@ -89,18 +87,20 @@ async function newAdvancedSearch(data) {
     return results
 }
 
-function getPatternedRootQuery(data) {
-    const searchPattern = data["rootSearchPatterned"]
+function getPatternedRootQuery(searchPattern) {
     if (searchPattern === ""){
         return {}
     }
+    console.log("~~~~~")
+    // console.log(recomposeRegex(searchPattern, patternedRegex))
+    console.log(searchPattern)
+    console.log("~~~~~")
     // query for searching roots, needs to be ignored if there are no searched roots
     const regex = patternedRegex(searchPattern)
     return {"searchable_roots": {"$regex": regex}}
 }
 
-function getReflexMeaningQuery(data) {
-    const searchString = data["reflexMeaningSearch"]
+function getReflexMeaningQuery(searchString) {
     if (searchString === ""){
         return {}
     }
@@ -108,8 +108,7 @@ function getReflexMeaningQuery(data) {
     return {"reflexes": {$elemMatch: {"gloss": {"$regex": searchRegex, "$options": "i"}}}}
 }
 
-function getRootMeaningQuery(data) {
-    const searchString = data["rootMeaningSearch"]
+function getRootMeaningQuery(searchString) {
     if (searchString === ""){
         return {}
     }
@@ -117,8 +116,7 @@ function getRootMeaningQuery(data) {
     return {"meaning": {"$regex": searchRegex, "$options": "i"}}
 }
 
-function getSemanticQuery(data) {
-    const searchString = data["semanticKeywordSearch"]
+function getSemanticQuery(searchString) {
     if (searchString === ""){
         return {}
     }
