@@ -44,9 +44,8 @@ block content
                                                     if index !== reflex.pos.length - 1
                                                         | .
                                             td.table-sources
-                                                each sources in reflex.combinedSources
-                                                    each source in sources
-                                                        span.popover-trigger(data-bs-toggle="popover", data-bs-content=source.display data-bs-placement="right")= source.code
+                                                each source in reflex.combinedSources
+                                                    span.popover-trigger(data-bs-toggle="popover", data-bs-content=source.display data-bs-placement="right")= source.code + " "
                     else
                         h4 Reflexes currently missing.
 

@@ -23,9 +23,7 @@ router.get('/:entry_id', async (req, res) => {
     if(pokornyEntry && pokornyEntry.reflexes) {
         pokornyEntry.reflexes = expandSources(pokornyEntry.reflexes)
         categorized = categorizeReflexesByLanguage(pokornyEntry.reflexes)
-        console.log(categorized.length)
     }
-    // console.log(pokornyEntry)
 
 
     // Render the dictionary entry template and pass the data
@@ -66,7 +64,6 @@ function categorizeReflexesByLanguage(reflexes) {
 
         categorizedObjects[languageFamily][subFamilyName].push(entry);
     });
-
     return categorizedObjects;
 }
 
