@@ -4,7 +4,8 @@ alt_letter_dict = {'a': ['ā', 'á', 'ā́'], 'b': ['bʰ'], 'd': ['dʰ'], 'e': [
 function checkLetter(event) {
     let input = event.currentTarget
     let inputText = input.value
-    let letter = inputText.toLowerCase()[inputText.length-1]
+    let cursorPosition = input.selectionStart
+    let letter = inputText.toLowerCase()[cursorPosition-1]
     let alternates = alt_letter_dict[letter]
     // todo: if the popover exists then destroy it (?) and reinitialize.
     if (alternates && alternates.length > 0) {
@@ -17,16 +18,17 @@ function checkLetter(event) {
 
 function replaceLetter(input, alternate) {
     const value = input.value
-    const replacedValue = value.substring(0, value.length - 1) + alternate
+    let cursorPosition = input.selectionStart
+    const replacedValue = value.substring(0, cursorPosition-1) + alternate + value.substring(cursorPosition)
     input.value = replacedValue
     restartPopover(input).hide()
 }
 
 function setPopoverContent(input){
-    console.log("redoing the content")
-
     let inputText = $(input).val()
-    let alternates = alt_letter_dict[inputText[inputText.length - 1]]
+    let cursorPosition = input.selectionStart
+    let letter = inputText.toLowerCase()[cursorPosition-1]
+    let alternates = alt_letter_dict[letter]
     let popoverContainer = document.createElement('div')
     popoverContainer.classList.add("btn-group")
     if(!alternates){

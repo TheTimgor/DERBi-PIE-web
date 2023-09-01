@@ -7,10 +7,10 @@ block content
                 .row.justify-content-center
                     .col-lg-4.text-center
                         h2
-                            strong.mb-4.text-center #{entry.root}
+                            strong.mb-4.text-center !{entry.root}
                         //.col-lg-4
                         h4
-                            span.ml-2 #{entry.meaning}
+                            span.ml-2 !{entry.meaning}
             .card-body
                 each dictionary in dictionaries
                     if dictionary.data && dictionary.data.cross && dictionary.data.cross.length > 0
