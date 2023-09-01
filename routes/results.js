@@ -12,11 +12,43 @@ function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
+
+async function searchID(id, collection_names) {
+    if(collection_names === undefined){
+        collection_names = ["liv", "pokorny"]
+    }
+    let results = {}
+    for(let collection_name of collection_names){
+        results[collection_name] = await performSearch({"common_id": id}, collection_name)
+    }
+    return results
+}
+
+async function searchAll(query, collection_names) {
+    if(collection_names === undefined){
+        collection_names = ["liv", "pokorny"]
+    }
+    // run performSearch on each collection, and then combine based on common_id
+    let common_ids = []
+    for(let collection_name of collection_names){
+        const results = await performSearch(query, collection_name)
+        // for each, extract the common_id and combine them all into one list
+        common_ids = common_ids.concat(results.map((item) => item.common_id))
+    }
+
+    // remove duplicates
+    common_ids = [...new Set(common_ids)]
+    common_ids.sort()
+
+    // run performSearch on common with the list of common_ids
+    return await performSearch({"common_id": {"$in": common_ids}}, "common")
+}
+
 async function performSearch(query, collection_name) {
     try {
         const collection = client.db(dbName).collection(collection_name)
-        console.log(JSON.stringify(query))
-        return await collection.find(query).toArray()
+        const results = await collection.find(query).toArray()
+        return results
     }
     catch (e) {
         return []
@@ -39,6 +71,7 @@ function patternedRegex(pseudoRegex) {
 }
 // endregion
 
+// entry point for the code
 router.get('/', async (req, res) => {
     try {
         let queryString = req.originalUrl.split('?')[1];
@@ -54,7 +87,7 @@ router.get('/', async (req, res) => {
 
         // if there is a single result, we redirect to it
         if (searchResults.length === 1) {
-            res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].entry_id)}`);
+            res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].common_id)}`);
             return
         }
 
@@ -78,7 +111,7 @@ async function getResults(data){
         let rootQuery = getPatternedRootQuery(data["search"])
         let rootMeaningQuery = getRootMeaningQuery(data["search"])
         let query = {"$or": [rootQuery, rootMeaningQuery]}
-        searchResults = await performSearch(query, "pokorny");
+        searchResults = await searchAll(query)
     }
 
     return searchResults
@@ -88,16 +121,17 @@ async function getResults(data){
 async function newAdvancedSearch(data) {
     // these are technically specific to pokorny, so new dictionaries collections need to either match the format, or have custom functions for their own queries
     let rootQuery = getPatternedRootQuery(data["rootSearchPatterned"])
-    let reflexQuery = getReflexMeaningQuery(data["reflexMeaningSearch"])
+    let reflexQuery = getReflexQuery(data["reflexSearch"])
+    let reflexMeaningQuery = getReflexMeaningQuery(data["reflexMeaningSearch"])
     let rootMeaningQuery = getRootMeaningQuery(data["rootMeaningSearch"])
     let semanticQuery = getSemanticQuery(data["semanticKeywordSearch"])
 
     // the combined query, currently just ANDs them all together, getting only the things in common.
     // todo: May want to eventually add a check box or something to make it an OR query.
-    let query = {"$and": [rootQuery, reflexQuery, rootMeaningQuery, semanticQuery]}
+    let query = {"$and": [rootQuery, reflexQuery, reflexMeaningQuery, rootMeaningQuery, semanticQuery]}
 
-    // todo: these results are for the pokorny table, which technically is not the same as the common table. I need to switch that out when another db gets added.
-    let results = await performSearch(query, "pokorny")
+    // search all collections for the query
+    let results = await searchAll(query)
     return results
 }
 
@@ -105,10 +139,10 @@ function getPatternedRootQuery(searchPattern) {
     if (searchPattern === ""){
         return {}
     }
-    console.log("~~~~~")
+    // console.log("~~~~~")
     // console.log(recomposeRegex(searchPattern, patternedRegex))
-    console.log(searchPattern)
-    console.log("~~~~~")
+    // console.log(searchPattern)
+    // console.log("~~~~~")
     // query for searching roots, needs to be ignored if there are no searched roots
     const regex = patternedRegex(searchPattern)
     return {"searchable_roots": {"$regex": regex}}
@@ -120,6 +154,14 @@ function getReflexMeaningQuery(searchString) {
     }
     const searchRegex = escapeRegExp(searchString)
     return {"reflexes": {$elemMatch: {"gloss": {"$regex": searchRegex, "$options": "i"}}}}
+}
+
+function getReflexQuery(searchString) {
+    if (searchString === ""){
+        return {}
+    }
+    const searchRegex = escapeRegExp(searchString)
+    return {"reflexes": {$elemMatch: {"reflexes": {$elemMatch: {"$regex": searchRegex, "$options": "i"}}}}}
 }
 
 function getRootMeaningQuery(searchString) {
@@ -141,4 +183,4 @@ function getSemanticQuery(searchString) {
 }
 // endregion
 
-module.exports = {resultsRoutes: router, getResults};
+module.exports = {resultsRoutes: router, getResults, searchID};

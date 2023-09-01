@@ -7,18 +7,18 @@ block content
                 .row.justify-content-center
                     .col-lg-4.text-center
                         h2
-                            strong.mb-4.text-center !{entry.root}
+                            strong.mb-4.text-center #{entry.root}
                         //.col-lg-4
                         h4
-                            span.ml-2 !{entry.meaning}
+                            span.ml-2 #{entry.meaning}
             .card-body
                 each dictionary in dictionaries
-                    if dictionary.data.cross.length > 0
-                        h3 Cross References
-                    each crossEntry in dictionary.data.cross
-                         a(href="/dictionary/" + crossEntry.id)= crossEntry.display
+                    if dictionary.data && dictionary.data.cross && dictionary.data.cross.length > 0
+                        h3 Cross References - #{dictionary.name}
+                        each crossEntry in dictionary.data.cross
+                             a(href="/dictionary/" + crossEntry.id)= crossEntry.display
                     if Object.keys(dictionary.categorizedReflexes).length > 0
-                        h3 Reflexes
+                        h3 Reflexes - #{dictionary.name}
                         table.table.table-striped.table-bordered
                             thead
                                 tr
@@ -48,6 +48,7 @@ block content
                                                     span.popover-trigger(data-bs-toggle="popover", data-bs-content=source.display data-bs-placement="right")= source.code + " "
                     else
                         h4 Reflexes currently missing.
+                    hr
 
 
     script(src="/javascripts/dictionaryFeatures.js")
