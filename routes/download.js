@@ -1,30 +1,42 @@
 const express = require('express');
-const {getResults} = require("./results");
+const {getResults, searchID, searchIDs} = require("./results");
 const router = express.Router();
 
 router.get('/', async (req, res) => {
     let searchResults = await getResults(req.query)
 
+    let ids = searchResults.map((e=>e.common_id))
+    let dictionaryResults = await searchIDs(ids)
+
     // Prepare the CSV data
-    const headers = ["root", "meaning", "derivative", "derivative meaning", "language", "form"];
+    const headers = ["root", "meaning", "derivative", "derivative meaning", "language", "form", "dictionary"];
     const csvRows = [headers.join(',')]; // Add the headers as the first row
 
-    for (const i in searchResults) {
-        let result = searchResults[i]
-        const root = result.root;
-        const meaning = result.meaning;
+    for (const dictionary in dictionaryResults){
+        for (const i in dictionaryResults[dictionary]) {
+            let result = dictionaryResults[dictionary][i]
+            // get the common id and find
+            const root = result.root;
+            const meaning = result.meaning;
+            for (const reflexObj of result.reflexes) {
+                const reflex = reflexObj.reflexes.join(", ");
+                const gloss = reflexObj.gloss;
+                const language = reflexObj.language.language_name;
+                console.log(reflexObj)
 
-        for (const reflexObj of result.reflexes) {
-            const reflex = reflexObj.reflexes.join(", ");
-            const gloss = reflexObj.gloss;
-            const language = reflexObj.language.language_name;
-            const form = reflexObj.pos.map(pos => pos.meaning).join(" ");
+                let form = undefined
+                if (typeof reflexObj.pos !== "object"){
+                    form = "NYI"
+                } else {
+                    form = reflexObj.pos.map(pos => pos.meaning).join(" ");
+                }
 
-            // Escape quotes, and surround each value with quotes
-            const row = [root, meaning, reflex, gloss, language, form].map(value => `"${String(value).replace(/"/g, '""')}"`);
+                // Escape quotes, and surround each value with quotes
+                const row = [root, meaning, reflex, gloss, language, form, dictionary].map(value => `"${String(value).replace(/"/g, '""')}"`);
 
-            // Add the row to the CSV data
-            csvRows.push(row.join(','));
+                // Add the row to the CSV data
+                csvRows.push(row.join(','));
+            }
         }
     }
 

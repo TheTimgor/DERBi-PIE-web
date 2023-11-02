@@ -23,6 +23,17 @@ async function searchID(id, collection_names) {
     }
     return results
 }
+async function searchIDs(ids, collection_names) {
+    // fixme: this should actually probably find what all the available collection names are as default and not just assume like it currently does.
+    if(collection_names === undefined){
+        collection_names = ["liv", "pokorny"]
+    }
+    let results = {}
+    for(let collection_name of collection_names){
+        results[collection_name] = await performSearch({"common_id": {"$in": ids}}, collection_name)
+    }
+    return results
+}
 
 async function searchAll(query, collection_names) {
     if(collection_names === undefined){
@@ -183,4 +194,4 @@ function getSemanticQuery(searchString) {
 }
 // endregion
 
-module.exports = {resultsRoutes: router, getResults, searchID};
+module.exports = {resultsRoutes: router, getResults, searchID, searchIDs};
