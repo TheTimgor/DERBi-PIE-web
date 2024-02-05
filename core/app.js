@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 
 // routers
-const indexRouter = require('./routes/index');
+const indexRouter = require('./routes');
 const dictionaryRouter = require('./routes/dictionary');
 const searchRoutes = require('./routes/search');
 const {downloadRouter} = require('./routes/download');
@@ -49,5 +49,10 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+// initialize plugins
+const loadPlugins = require('./pluginLoader');
+const PluginInterface = require('./pluginInterface');
+const plugins = loadPlugins(PluginInterface);
 
 module.exports = app;

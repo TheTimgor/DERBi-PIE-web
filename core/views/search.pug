@@ -1,0 +1,38 @@
+extends layout
+
+block content
+    .container
+        .row.justify-content-center.align-items-center
+            img(src="images/Trundholm-Sun-Chariot.jpg" class="splash-image")
+        .row.justify-content-center.align-items-top
+            .col-lg-8
+                h1.text-center.mb-4 Search
+                form(method="GET", action="/results")
+                    .input-group.mb-3
+                        //label.input-group-text(for="search-input") Meaning
+                        input.form-control.alt-keys#search-input(type="text", name="search", placeholder="Enter a root")
+                        #alt-letter-popover(style="display: none;")
+                        button.btn.btn-success(type="submit", name='submit', value="normal") Search
+                        a.btn.btn-info(href="instructions") ?
+                        button.btn.btn-warning(type="button" data-bs-toggle="collapse" data-bs-target="#collapseSearch" aria-expanded="false" aria-controls="collapseSearch") Advanced
+        .row.justify-content-center.align-items-top
+            .col-lg-6.collapse#collapseSearch
+                //h3.text-center.mb-4 Plugin Search
+                form(method="GET", action="/results")
+                    each entry in searchData
+                        h3.text-center.mb-4 #{entry.name}
+                        each field in entry.fields
+                            .form-group
+                                label(for=field.id) #{field.label}
+                                .input-group.mb-3
+                                    input(id=field.id, value=field.value).form-control(type=field.type, name=field.name, placeholder=field.placeholder)
+                                    // todo: add ability to add extra buttons like the one below?
+                                    // div.btn.btn-info Help
+
+                    .form-group.text-center
+                        br
+                        button.btn.btn-success(type="submit", name='submit', value="advanced") Advanced Search
+        .row
+
+    script(src="javascripts/alt_letters.js")
+    script(src="javascripts/search.js")

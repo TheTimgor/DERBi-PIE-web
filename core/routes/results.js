@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { MongoClient } = require('mongodb');
 const fs = require("fs");
+const pluginManager = require('../pluginManager');
 
 const uri = 'mongodb://localhost:27017';
 const dbName = 'DERBI-PIE';
@@ -129,50 +130,60 @@ async function getResults(data){
 }
 
 // region search functions
+async function pluginSearch(data){
+    // pass the data to each plugin.
+    // fixme: currently every plugin is given the entire search data, but this can be limited if we want to.
+    const availableCollections = ["liv", "pokorny"]
+    let searchQueries = pluginManager.getSearchQueries()
+
+    let pluginIDs = []
+
+    for(let {searchMethod, searchCollections} of searchQueries){
+        let query = searchMethod(data)
+        let collections = searchCollections(data, availableCollections)
+
+        // run performSearch on each collection, and then combine based on common_id
+        let commonIDs = []
+        for(let collection_name of collections){
+            const results = await performSearch(query, collection_name)
+            // for each, extract the common_id and combine them all into one list
+            commonIDs = commonIDs.concat(results.map((item) => item.common_id))
+        }
+        // remove duplicates
+        pluginIDs.push([...new Set(commonIDs)])
+    }
+
+    // do a set intersection on every list of ids to act as an AND statement between them all
+    let finalIDs = undefined
+    for(let idList of pluginIDs){
+        if(finalIDs === undefined){
+            finalIDs = new Set(idList)
+        }else{
+            finalIDs.intersection(new Set(idList))
+        }
+    }
+    finalIDs = [...finalIDs]
+
+    finalIDs.sort()
+
+    console.log(finalIDs)
+
+    // run performSearch on common with the list of common_ids
+    return await performSearch({"common_id": {"$in": finalIDs}}, "common")
+}
+
+
 async function newAdvancedSearch(data) {
-    // these are technically specific to pokorny, so new dictionaries collections need to either match the format, or have custom functions for their own queries
-    let rootQuery = getPatternedRootQuery(data["rootSearchPatterned"])
-    let reflexQuery = getReflexQuery(data["reflexSearch"])
-    let reflexMeaningQuery = getReflexMeaningQuery(data["reflexMeaningSearch"])
-    let rootMeaningQuery = getRootMeaningQuery(data["rootMeaningSearch"])
-    let semanticQuery = getSemanticQuery(data["semanticKeywordSearch"])
-
-    // the combined query, currently just ANDs them all together, getting only the things in common.
-    // todo: May want to eventually add a check box or something to make it an OR query.
-    let query = {"$and": [rootQuery, reflexQuery, reflexMeaningQuery, rootMeaningQuery, semanticQuery]}
-
-    // search all collections for the query
-    let results = await searchAll(query)
-    return results
+    return await pluginSearch(data)
 }
 
 function getPatternedRootQuery(searchPattern) {
     if (searchPattern === ""){
         return {}
     }
-    // console.log("~~~~~")
-    // console.log(recomposeRegex(searchPattern, patternedRegex))
-    // console.log(searchPattern)
-    // console.log("~~~~~")
     // query for searching roots, needs to be ignored if there are no searched roots
     const regex = patternedRegex(searchPattern)
     return {"searchable_roots": {"$regex": regex}}
-}
-
-function getReflexMeaningQuery(searchString) {
-    if (searchString === ""){
-        return {}
-    }
-    const searchRegex = escapeRegExp(searchString)
-    return {"reflexes": {$elemMatch: {"gloss": {"$regex": searchRegex, "$options": "i"}}}}
-}
-
-function getReflexQuery(searchString) {
-    if (searchString === ""){
-        return {}
-    }
-    const searchRegex = escapeRegExp(searchString)
-    return {"reflexes": {$elemMatch: {"reflexes": {$elemMatch: {"$regex": searchRegex, "$options": "i"}}}}}
 }
 
 function getRootMeaningQuery(searchString) {
@@ -181,16 +192,6 @@ function getRootMeaningQuery(searchString) {
     }
     const searchRegex = escapeRegExp(searchString)
     return {"meaning": {"$regex": searchRegex, "$options": "i"}}
-}
-
-function getSemanticQuery(searchString) {
-    if (searchString === ""){
-        return {}
-    }
-    const searchRegex = escapeRegExp(searchString)
-    console.log(searchRegex)
-    // todo: The semantic field is never filled in, which means I cannot test this. I dont even know what it is going to look like.
-    return {"semantic": {$elemMatch: {"$regex": searchRegex, "$options": "i"}}}
 }
 // endregion
 
