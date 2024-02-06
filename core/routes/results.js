@@ -1,18 +1,59 @@
 const express = require('express');
 const router = express.Router();
-const { MongoClient } = require('mongodb');
 const fs = require("fs");
 const pluginManager = require('../pluginManager');
+const {client, dbName} = require("../mongoConnection");
 
-const uri = 'mongodb://localhost:27017';
-const dbName = 'DERBI-PIE';
-const client = new MongoClient(uri);
+// entry point for the code
+router.get('/', async (req, res) => {
+    try {
+        let queryString = req.originalUrl.split('?')[1];
+        let special = false
+        // special case when you just go to results
+        if (queryString === undefined) {
+            queryString = "search="
+            req.query = {'search': '', 'submit': 'normal'}
+            special = true
+        }
+        console.log(req.query)
+        let searchResults = await getResults(req.query)
+
+        // if there is a single result, we redirect to it
+        if (searchResults.length === 1) {
+            res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].common_id)}`);
+            return
+        }
+
+        // Render the search results page
+        res.render('results', {results: searchResults, queryString: queryString ? `?${queryString}` : '', renderIndex: special});
+    }
+    catch (error) {
+        console.error(error)
+        res.render('results', {results: [], queryString: ''});
+    }
+});
+
+async function getResults(data){
+    // Perform the database query to retrieve search results
+    let searchResults = []
+
+    // switch between a regular search and an advanced search. regular search is default.
+    if (data && data.submit && data.submit === "advanced"){
+        searchResults = await newAdvancedSearch(data);
+    }else{
+        let rootQuery = getPatternedRootQuery(data["search"])
+        let rootMeaningQuery = getRootMeaningQuery(data["search"])
+        let query = {"$or": [rootQuery, rootMeaningQuery]}
+        searchResults = await searchAll(query)
+    }
+
+    return searchResults
+}
 
 // region helpers
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
-
 
 async function searchID(id, collection_names) {
     if(collection_names === undefined){
@@ -24,6 +65,7 @@ async function searchID(id, collection_names) {
     }
     return results
 }
+
 async function searchIDs(ids, collection_names) {
     // fixme: this should actually probably find what all the available collection names are as default and not just assume like it currently does.
     if(collection_names === undefined){
@@ -83,52 +125,6 @@ function patternedRegex(pseudoRegex) {
 }
 // endregion
 
-// entry point for the code
-router.get('/', async (req, res) => {
-    try {
-        let queryString = req.originalUrl.split('?')[1];
-        let special = false
-        // special case when you just go to results
-        if (queryString === undefined) {
-            queryString = "search="
-            req.query = {'search': '', 'submit': 'normal'}
-            special = true
-        }
-        console.log(req.query)
-        let searchResults = await getResults(req.query)
-
-        // if there is a single result, we redirect to it
-        if (searchResults.length === 1) {
-            res.redirect(`/dictionary/${encodeURIComponent(searchResults[0].common_id)}`);
-            return
-        }
-
-        // Render the search results page
-        res.render('results', {results: searchResults, queryString: queryString ? `?${queryString}` : '', renderIndex: special});
-    }
-    catch (error) {
-        console.error(error)
-        res.render('results', {results: [], queryString: ''});
-    }
-});
-
-async function getResults(data){
-    // Perform the database query to retrieve search results
-    let searchResults = []
-
-    // switch between a regular search and an advanced search. regular search is default.
-    if (data && data.submit && data.submit === "advanced"){
-        searchResults = await newAdvancedSearch(data);
-    }else{
-        let rootQuery = getPatternedRootQuery(data["search"])
-        let rootMeaningQuery = getRootMeaningQuery(data["search"])
-        let query = {"$or": [rootQuery, rootMeaningQuery]}
-        searchResults = await searchAll(query)
-    }
-
-    return searchResults
-}
-
 // region search functions
 async function pluginSearch(data){
     // pass the data to each plugin.
@@ -165,8 +161,6 @@ async function pluginSearch(data){
     finalIDs = [...finalIDs]
 
     finalIDs.sort()
-
-    console.log(finalIDs)
 
     // run performSearch on common with the list of common_ids
     return await performSearch({"common_id": {"$in": finalIDs}}, "common")

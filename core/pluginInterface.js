@@ -2,6 +2,7 @@ class pluginInterface {
     constructor() {
         // check that the plugin implements things correctly?
         // maybe other things I can think of?
+        // todo: this should just be read from the config file. setting it in code is dumb
         this.name = "interface"
         return undefined
     }
@@ -18,8 +19,12 @@ class pluginInterface {
         return {}
     }
 
-    searchCollections(searchObj, availableCollections){
+    searchCollections(searchObj, availableCollections) {
         return availableCollections
+    }
+
+    getData() {
+        return []
     }
     // more things to follow
 }

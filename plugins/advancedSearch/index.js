@@ -7,6 +7,7 @@ class advancedSearch extends pluginInterface {
         super();
         this.name = "Advanced Search"
     }
+
     searchFields() {
         return [
             {
@@ -52,6 +53,7 @@ class advancedSearch extends pluginInterface {
             // ... as many as needed, ordering matters for display
         ]
     }
+
     searchProcessing(searchObj) {
         // these are technically specific to pokorny, so new dictionaries collections need to either match the format, or have custom functions for their own queries
         let rootQuery = getPatternedRootQuery(searchObj["rootSearchPatterned"])
@@ -71,7 +73,7 @@ function escapeRegExp(str) {
 }
 
 function patternedRegex(pseudoRegex) {
-    const path = "./private/regex.json"
+    const path = "./data/regex.json"
     const data = fs.readFileSync(path)
     const linguisticDict = JSON.parse(data)
     // Create a regex pattern to search for keys in the dictionary
