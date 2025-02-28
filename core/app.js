@@ -8,6 +8,7 @@ const logger = require('morgan');
 const indexRouter = require('./routes');
 const dictionaryRouter = require('./routes/dictionary');
 const searchRoutes = require('./routes/search');
+const constructionRoutes = require('./routes/construction');
 const {downloadRouter} = require('./routes/download');
 const {resultsRoutes} = require('./routes/results');
 const instructionsRouter = express.Router().get('/', (req, res) => {res.render('instructions.pug')});
@@ -27,7 +28,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/dictionary', dictionaryRouter);
-app.use('/search', searchRoutes);
+app.use('/search', constructionRoutes);
+app.use('/searchProper', searchRoutes);
+
 app.use('/results', resultsRoutes);
 app.use('/about', aboutRoutes);
 app.use('/instructions', instructionsRouter);

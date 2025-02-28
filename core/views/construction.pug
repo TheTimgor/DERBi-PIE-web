@@ -1,0 +1,47 @@
+doctype html
+html
+  head
+    title #{title}
+
+    script(src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" , integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css", integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM", crossorigin="anonymous")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css", integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==", crossorigin="anonymous")
+    link(rel="stylesheet", href="/stylesheets/style.css")
+  body
+    .page-container
+
+      main.container
+        .container.text-center
+            .row.justify-content-center.align-items-center
+                .col-lg-8
+                    img(src="images/DERBi-PIE-logo.png" class="splash-image mb-4")
+                    h1 DERBi PIE
+                    h2 Database of Etymological Roots Beginning in Proto-Indo-European
+                    p.mt-4 We're hard at work building something amazing!
+                    p Please check back soon as we continue to refine our database.
+
+        a.invisible-link(href="/searchProper") &nbsp;
+
+        style.
+            .invisible-link {
+                position: fixed;
+                bottom: 10px;
+                left: 10px;
+                color: white;
+                background-color: white;
+                text-decoration: none;
+            }
+            .splash-image {
+                max-width: 100%;
+                height: auto;
+            }
+
+
+      contact.divider.text-center
+                h5 Contact
+                p
+                    | Email:
+                    |
+                    a(href="mailto:andrewbyrd@uky.edu") andrewbyrd@uky.edu
+
