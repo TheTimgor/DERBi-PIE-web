@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  .container
+    h1.mb-4 Admin Dashboard
+    if error
+      .alert.alert-danger= error
+
+    .card.mb-4
+      .card-header
+        h2.h5.mb-0 Generate Invite Code
+      .card-body
+        form(method="POST", action="/admin/generate-code")
+          .d-grid.gap-2
+            button.btn.btn-primary(type="submit") Generate New Invite Code
+
+    .card
+      .card-header
+        h2.h5.mb-0 Invite Codes
+      .card-body
+        table.table
+          thead
+            tr
+              th Code
+              th Status
+              th Created
+              th Used By
+          tbody
+            each code in inviteCodes
+              tr
+                td= code.code
+                td
+                  if code.isUsed
+                    span.badge.bg-secondary Used
+                  else
+                    span.badge.bg-success Available
+                td= code.createdAt ? code.createdAt.toLocaleDateString() : '-'
+                td= code.usedByUsername || '-'

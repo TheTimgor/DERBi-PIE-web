@@ -22,7 +22,6 @@ router.get('/', async (req, res) => {
                 const reflex = reflexObj.reflexes.join(", ");
                 const gloss = reflexObj.gloss;
                 const language = reflexObj.language.language_name;
-                console.log(reflexObj)
 
                 let form = undefined
                 if (typeof reflexObj.pos !== "object"){

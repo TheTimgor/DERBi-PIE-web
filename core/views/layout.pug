@@ -12,19 +12,42 @@ html
     .page-container
       nav.navbar.navbar-expand-lg.navbar-light.bg-light
         .container
-          a.navbar-brand(href="/search") DERBi PIE
+          a.navbar-brand(href="/") DERBi PIE
           button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
             span.navbar-toggler-icon
           .collapse.navbar-collapse#navbarNav
-            ul.navbar-nav.ml-auto
-              li.nav-item
-                a.nav-link(href="/search") Search
-              li.nav-item
-                a.nav-link(href="/about") About
-              li.nav-item
-                a.nav-link(href="/instructions") Instructions
-              li.nav-item
-                a.nav-link(href="/results") Index
+            ul.navbar-nav.me-auto
+              if user
+                li.nav-item
+                  a.nav-link(href="/search") Search
+                li.nav-item
+                  a.nav-link(href="/about") About
+                li.nav-item
+                  a.nav-link(href="/instructions") Instructions
+                li.nav-item
+                  a.nav-link(href="/results") Index
+                li.nav-item
+                  a.nav-link(href="/download") Download
+                if user.username == "admin"
+
+                  li.nav-item
+                    a.nav-link(href="/admin") Admin Dashboard
+              else
+                li.nav-item
+                  a.nav-link(href="/construction") Home
+                li.nav-item
+                  a.nav-link(href="/about") About
+                li.nav-item
+                  a.nav-link(href="/login") Login
+
+            if user
+              ul.navbar-nav
+                li.nav-item.d-flex.align-items-center
+                  span.text-secondary.me-2
+                    i.fas.fa-user.me-1
+                    | #{user.username}
+                li.nav-item
+                  a.btn.btn-outline-secondary.btn-sm(href="/login/logout") Logout
 
       main.container
         block content

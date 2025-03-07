@@ -3,6 +3,15 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const mongoose = require('mongoose');
+const User = require('./models/user');
+const {connect} = require('./mongooseConnection');
+
+// Connect to MongoDB (adjust your connection string)
+connect()
 
 // routers
 const indexRouter = require('./routes');
@@ -13,6 +22,7 @@ const {downloadRouter} = require('./routes/download');
 const {resultsRoutes} = require('./routes/results');
 const instructionsRouter = express.Router().get('/', (req, res) => {res.render('instructions.pug')});
 const aboutRoutes = express.Router().get('/', (req, res) => {res.render('about')});
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
@@ -26,16 +36,77 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Set up sessions
+app.use(session({
+  secret: 'your-secret-key-here',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure Passport LocalStrategy
+passport.use(new LocalStrategy(
+  async (username, password, done) => {
+    try {
+      const user = await User.findOne({ username: username });
+      if (!user) return done(null, false, { message: 'Incorrect username or password' });
+
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) return done(null, false, { message: 'Incorrect username or password' });
+
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
+// Serialize and deserialize user
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
+
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  next();
+});
+
+// Define a middleware to check authentication
+const isAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/login');
+};
+
+//public routes
 app.use('/', indexRouter);
-app.use('/dictionary', dictionaryRouter);
-app.use('/search', constructionRoutes);
-app.use('/searchProper', searchRoutes);
-
-app.use('/results', resultsRoutes);
+app.use('/construction', constructionRoutes);
 app.use('/about', aboutRoutes);
-app.use('/instructions', instructionsRouter);
-app.use('/download', downloadRouter);
+app.use('/login', require('./routes/auth'));
 
+//protected routes
+app.use('/dictionary', isAuthenticated, dictionaryRouter);
+app.use('/search', isAuthenticated, searchRoutes);
+app.use('/results', isAuthenticated, resultsRoutes);
+app.use('/instructions', isAuthenticated, instructionsRouter);
+app.use('/download', isAuthenticated, downloadRouter);
+
+// Admin routes (protected)
+app.use('/admin', isAuthenticated, adminRoutes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

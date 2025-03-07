@@ -15,7 +15,6 @@ router.get('/', async (req, res) => {
             req.query = {'search': '', 'submit': 'normal'}
             special = true
         }
-        console.log(req.query)
         let searchResults = await getResults(req.query)
 
         // if there is a single result, we redirect to it
@@ -172,7 +171,7 @@ async function newAdvancedSearch(data) {
 }
 
 function getPatternedRootQuery(searchPattern) {
-    if (searchPattern === ""){
+    if (searchPattern === "" || searchPattern === undefined){
         return {}
     }
     // query for searching roots, needs to be ignored if there are no searched roots
@@ -181,7 +180,7 @@ function getPatternedRootQuery(searchPattern) {
 }
 
 function getRootMeaningQuery(searchString) {
-    if (searchString === ""){
+    if (searchString === "" || searchString === undefined){
         return {}
     }
     const searchRegex = escapeRegExp(searchString)

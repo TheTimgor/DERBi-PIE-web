@@ -1,0 +1,26 @@
+extends layout
+
+block content
+    .container
+        .row.justify-content-center.align-items-center
+            img(src="images/DERBi-PIE-logo.png" class="splash-image")
+        .row.justify-content-center.align-items-top
+            .col-lg-6
+                h1.text-center.mb-4 Register Account
+                if error
+                    .alert.alert-danger.text-center #{error}
+                form(method="POST", action="/login/register")
+                    .form-group.mb-3
+                        label.form-label(for="username") Username
+                        input.form-control#username(type="text", name="username", placeholder="Choose a username", required)
+                    .form-group.mb-3
+                        label.form-label(for="password") Password
+                        input.form-control#password(type="password", name="password", placeholder="Choose a password", required)
+                    .form-group.mb-3
+                        label.form-label(for="inviteCode") Invite Code
+                        input.form-control#inviteCode(type="text", name="inviteCode", placeholder="Enter your invite code", required)
+                    .d-grid.gap-2.mb-3
+                        button.btn.btn-success(type="submit") Register
+                    .text-center
+                        p Already have an account?
+                            a(href="/login") Log in here
