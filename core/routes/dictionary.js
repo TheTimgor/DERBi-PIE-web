@@ -15,7 +15,7 @@ function capitalize(word) {
 router.get('/:common_id', async (req, res) => {
     const common_id = req.params.common_id;
 
-    const results = await searchID(common_id)
+    const results = await searchID(common_id, ["liv", "pokorny", "common"])
     // const query = {common_id}
 
     // const commonCollection = client.db(dbName).collection("common")
@@ -26,6 +26,7 @@ router.get('/:common_id', async (req, res) => {
 
     // results is a dict {"tableName": [results]}, and I need to loop through each (but not common), and process the reflexes
     let dictionaries = []
+    let common = results["common"]
     for(let tableName in results){
         if(tableName === "common"){
             continue
@@ -44,10 +45,13 @@ router.get('/:common_id', async (req, res) => {
 
     // create an entry from the data in pokorny (if it exists) and liv otherwise
     let entry = dictionaries.find((entry) => entry.name === "Pokorny") || dictionaries.find((entry) => entry.name === "Liv")
+    if(!(entry && entry.data)){
+        res.redirect("/404")
+    }
     entry = entry.data
 
     // Render the dictionary entry template and pass the data
-    res.render('dictionary', {entry, dictionaries});
+    res.render('dictionary', {entry, dictionaries, common});
 });
 
 

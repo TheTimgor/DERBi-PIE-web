@@ -99,9 +99,10 @@ app.use('/about', aboutRoutes);
 app.use('/login', require('./routes/auth'));
 
 //protected routes
-app.use('/dictionary', isAuthenticated, dictionaryRouter);
+// todo: some of these SHOULD be protected, but are not for convenience
+app.use('/dictionary', dictionaryRouter);
 app.use('/search', isAuthenticated, searchRoutes);
-app.use('/results', isAuthenticated, resultsRoutes);
+app.use('/results', resultsRoutes);
 app.use('/instructions', isAuthenticated, instructionsRouter);
 app.use('/download', isAuthenticated, downloadRouter);
 

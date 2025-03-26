@@ -16,7 +16,7 @@ block content
                     if dictionary.data && dictionary.data.cross && dictionary.data.cross.length > 0
                         h3 Cross References - #{dictionary.name}
                         each crossEntry in dictionary.data.cross
-                             a(href="/dictionary/" + crossEntry.id)= crossEntry.display
+                             a(href="/dictionary/" + crossEntry.common_id)= crossEntry.display
                     if Object.keys(dictionary.categorizedReflexes).length > 0
                         h3 Reflexes - #{dictionary.name}
                         table.table.table-striped.table-bordered
@@ -50,5 +50,25 @@ block content
                         h4 Reflexes currently missing.
                     hr
 
+            // Related Concepticon Concepts Section
+            if common && common.length > 0 && common[0].concepticon && common[0].concepticon.length > 0
+                h3 Related Concepticon Concepts
+                table.table.table-striped.table-bordered
+                    thead
+                        tr
+                            th ID
+                            th Gloss
+                            th Definition
+                            th Semantic Field
+                    tbody
+                        each item in common
+                            if item.concepticon && item.concepticon.length > 0
+                                each concept in item.concepticon
+                                    tr
+                                        td
+                                            a(href="https://concepticon.clld.org/parameters/" + concept.id target="_blank") #{concept.id}
+                                        td= concept.gloss
+                                        td !{concept.definition}
+                                        td= concept.semanticfield
 
     script(src="/javascripts/dictionaryFeatures.js")
