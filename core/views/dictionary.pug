@@ -5,7 +5,7 @@ block content
         .card
             .card-body
                 .row.justify-content-center
-                    .col-lg-4.text-center
+                    .col-4.text-center
                         h2
                             strong.mb-4.text-center #{entry.rt_shape}
                         //.col-lg-4
@@ -26,10 +26,29 @@ block content
                         if entry.variant_id
                             span Variant of: 
                             a(href="/dictionary/"+entry.variant_id) #{entry.variant_shape}
+                        br
+                .text-center
+                    span Attested in 
+                    each lang, index in entry.attested_in
+                        if lang
+                            span #{lang}
+                            if index != entry.attested_in.length-1
+                                span , 
             each dictionary, source in sources
-                h3(data-bs-toggle="collapse" data-bs-target="#collapse"+source).mb0.card-header 
-                    .dropdown-toggle Reflexes in #{source}
+                h4(data-bs-toggle="collapse" data-bs-target="#collapse"+source).mb0.card-header 
+                    .dropdown-toggle 
+                        span Reconstructions in 
+                        i #{dictionary.ref_authors} (#{dictionary.ref_date})
                 div(id="collapse"+source).collapse 
+                    h5.card-body
+                        if dictionary.questionable_root
+                            span.text-secondary (?)&nbsp;
+                        span.pr-2 #{dictionary.rt_shape}&Tab;&Tab;
+                        if dictionary.questionable_meaning
+                            span.text-secondary (?)&nbsp;
+                        i.pr-2 #{dictionary.rt_gloss}
+
+
                     table.card-body.table.table-striped.table-bordered.mb-0
                         thead
                             tr
@@ -38,9 +57,9 @@ block content
                                 th Gloss
                                 th Grammar
                         tbody
-                        each reflex in dictionary
+                        each reflex in dictionary.reflexes
                             tr
-                                td.table-langauge= reflex.full_xlanguage_name
+                                td.table-langauge= reflex.full_language_name
                                 td.table-reflex= reflex.reflex
                                 td.table-gloss= reflex.gloss_orig
                                 td.table-grammar= reflex.category 

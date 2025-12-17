@@ -52,9 +52,11 @@ router.get('/:common_id', async (req, res) => {
 
 
     // get the attested reflexes
+    // this query is really bad but it works and is still faster than mongodb
     let [dictionary, ] = await con.promise().execute(
         `
-            select * from lex_ref_link 
+            select lex_ref_link.*, rt_ref_link.*, lang_abbrev_master.*, lang_master.*, top_branch_master.* 
+            from lex_ref_link 
             left join rt_ref_link on 
             (
                 rt_ref_link.ref_rt_index=lex_ref_link.ref_rt_index
@@ -67,12 +69,19 @@ router.get('/:common_id', async (req, res) => {
             collate utf8mb3_general_ci
             left join lang_master on lang_abbrev_master.eng_abbrev=lang_master.eng_abbrev
             collate utf8mb3_general_ci
+            left join ref_master on lex_ref_link.ref_id=ref_master.ref_id
+            left join branch_master on lang_master.Glottolog_lang=branch_master.\`Language\`
+            left join branch_master as top_branch_master on top_branch_master.\`Language\`=branch_master.top_branch 
             where rt_ref_link.rt_master_id=?
             and reflex is not null
             ; 
         `,
         [root_id]
     );
+
+    entry.attested_in = [...new Set(dictionary.map(r => r.Lang_name))]
+
+    console.log(dictionary)
 
     // console.log(dictionary)
 
@@ -87,12 +96,21 @@ router.get('/:common_id', async (req, res) => {
     let sources = {}
     for(reflex of dictionary){
         if( !(reflex.ref_id in sources) ){
-            sources[reflex.ref_id] = [];
+            let [[ref_info], ] = await con.promise().execute(
+                'select * from ref_master where ref_id=?', 
+                [reflex.ref_id]
+            );
+            ref_info.reflexes=[]
+            ref_info.rt_gloss = reflex.rt_gloss_eng ? reflex.rt_gloss_eng : reflex.rt_gloss_orig
+            ref_info.rt_shape = reflex.rt_shape
+            ref_info.questionable_root = Boolean(parseInt(reflex.questionable_root)) 
+            ref_info.questionable_meaning = Boolean(parseInt(reflex.questionable_meaning)) 
+            sources[reflex.ref_id] = ref_info;
         }
 
-        sources[reflex.ref_id].push(reflex)
+        sources[reflex.ref_id].reflexes.push(reflex)
     }
-    console.log(Object.keys(sources))
+    // console.log(Object.keys(sources))
 
     // // sort individual sources
     // for(s in sources){
@@ -136,6 +154,5 @@ async function getLangsFromAbbrevs(abbrevs){
     results.map( r => { langDict[r.matched_by] = r.full_language_name });
     return langDict;
 }
-
 
 module.exports = router;
